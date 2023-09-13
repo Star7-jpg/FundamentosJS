@@ -30,3 +30,9 @@ const limpiar = () => {
     num1.value = '';
     num2.value = '';
 }
+
+const random = () =>{
+    num1.value = Math.round(Math.random()*10000);
+    num2.value = Math.round(Math.random()*10000);
+
+}
