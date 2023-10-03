@@ -1,70 +1,78 @@
-const inputTarea = document.querySelector('#inputTarea');
-const tareas = document.querySelector('#tareas');
-const btnTarea = document.querySelector('#btnTarea');
+const catalogo = document.querySelector('#lista-cursos');
+const table = document.querySelector('#carrito tbody');
+const btnVaciar = document.querySelector('#vaciar-carrito');
 
-function createAlert(message){
-    /*
-    <div class="alert alert-primary" role="alert">
-        A simple primary alert-check it out!
-    </div>
-    */
+let carrito = [];
 
-    const alerta = document.createElement('div');
-    alerta.classList.add('alert');
-    alerta.classList.add('alert-primary');
-    alerta.setAttribute('role', 'alert');
-
-    let buttons = '<div>'
-    buttons += `<button class="btn red">Red</button>`
-    buttons += `<button class="btn yellow">Yellow</button>`
-    buttons += `<button class="btn green">Green</button>`
-    buttons += `<button class="btn x"><i class="fa fa-trash"></i></button>`
-    alerta.innerHTML = `<p>${ message }</p> ${buttons}`;
-    return alerta;
-}
-
-function addTarea() {
-    const data = inputTarea.value;
-    if (data) {
-        tareas.appendChild(createAlert(data));
-        inputTarea.value = '';
+function getProduct(e){
+    e.preventDefault();
+    if(e.target.classList.contains('agregar-carrito')){
+        const item = {}
+        const cardParent = e.target.parentElement;
+        item.id = e.target.getAttribute('data-id');
+        item.name = cardParent.querySelector('h4').innerText;
+        item.price = cardParent.querySelector('p span').innerText;
+        item.image = cardParent.parentElement.querySelector('img').src;
+        item.cantity = 1;
+        //Verificar existencia item
+        addItem(item);
+        fillTable();
     }
 }
 
-function getButton(e) {
-    console.log(e.target.classList);
-    if (e.target.classList.contains('btn')) {
-        
-        // alert('Le diste a un botón' + e.target.innerText);
-        const alertActual = e.target.parentElement.parentElement;
-        const action = e.target.classList[1];
-        
+function cleanTable(){
+    table.innerHTML = '';
+}
 
-        switch (action) {
-            case 'red':
-                alertActual.classList = [];
-                alertActual.classList.add('alert', 'alert-danger');
-                break;
-            case 'yellow':
-                alertActual.classList = [];
-                alertActual.classList.add('alert', 'alert-warning');
-                break;
-            case 'green':
-                alertActual.classList = [];
-                alertActual.classList.add('alert', 'alert-success');
-                break;
-       
-            default:
-                alertActual.remove();
-                break;
-        }
+function addItem(item){
+    if(carrito.some(itemCarrito => itemCarrito.id === item.id)){
+        //incrementar cantidad de item
+        carrito.forEach(itemCarrito => {
+            if(itemCarrito.id === item.id){
+                itemCarrito.cantity++;
+            }
+        });
+    } else {
+        carrito.push(item);
     }
+    console.log(carrito);
+}
 
-    if (e.target.classList.contains('fa')) {
-        const actual = e.target.parentElement.parentElement.parentElement;
-        actual.remove();
+function createRow (item){
+    const row = document.createElement('tr');
+    let htmlRow = '';
+    htmlRow += `<td><img src="${ item.image }" width="100px"></td>`
+    htmlRow += `<td>${ item.name }</td>`
+    htmlRow += `<td>${ item.price }</td>`
+    htmlRow += `<td>${ item.cantity }</td>`
+    htmlRow += `<td><button class="btn" data-id="${ item.id }">X</button></td>`;
+    row.innerHTML = htmlRow;
+    return row;
+}
+
+function fillTable(){
+    cleanTable();
+    carrito.forEach(itemCarrito => {
+        table.appendChild(createRow(itemCarrito));
+    });
+}
+
+function delItem(e){
+    if(e.target.classList.contains('btn')){
+        const id = e.target.getAttribute('data-id');
+        console.log('Elimina ' + id);
+        carrito = carrito.filter(item => item.id !== id);
+        fillTable();
     }
 }
 
-btnTarea.addEventListener('click', addTarea);
-tareas.addEventListener('click', getButton);
+function vaciar(e){
+    e.preventDefault();
+    cleanTable();
+    carrito = [];
+}
+
+
+catalogo.addEventListener('click', getProduct);
+table.addEventListener('click', delItem);
+btnVaciar.addEventListener('click', vaciar);
